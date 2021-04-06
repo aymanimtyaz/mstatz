@@ -7,6 +7,8 @@ from flask import Flask
 from flask import request
 from flask import jsonify
 
+from config import Current as Config
+
 
 app = Flask(__name__)
 
@@ -283,4 +285,4 @@ def question3():
     return jsonify(belt_data_avg_sorted)
 
 if __name__ == '__main__':
-    app.run(debug = True)
+    app.run(debug = Config.FLASK_DEBUG, host = Config.FLASK_HOST, port = Config.FLASK_PORT)
