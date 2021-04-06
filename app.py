@@ -284,5 +284,18 @@ def question3():
 
     return jsonify(belt_data_avg_sorted)
 
+@app.route('/', methods = ['GET'])
+def index():
+    return {
+        "Name":"Ayman Imtyaz",
+        "GitHub for this assignment":"https://github.com/aymanimtyaz/mstatz",
+        "endpoints":{
+            "question1":"/question1",
+            "question2":"/question2",
+            "question3":"/question3"
+        },
+        "Example query param":"?start_time=2021-01-28T07:30:00Z&end_time=2021-01-28T13:30:00Z"
+    }, 200
+
 if __name__ == '__main__':
     app.run(debug = Config.FLASK_DEBUG, host = Config.FLASK_HOST, port = Config.FLASK_PORT)
