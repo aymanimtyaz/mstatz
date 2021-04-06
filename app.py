@@ -19,6 +19,22 @@ data3 = json.loads((open('sample_json_3.json', 'r').read()))
 qs_time_format = "%Y-%m-%dT%H:%M:%SZ"
 json_time_format = "%Y-%m-%d %H:%M:%S"
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+#       UTILITY FUNCTIONS
+
+
 def transform_and_verify_inputs(start_time, end_time, data):
 
     ''' Transforms start_time and end_time from the query string to python datetimes.
@@ -108,6 +124,28 @@ def get_inputs_from_query_string():
         "end_time":end_time
     }, 0
     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#       ENDPOINTS BELOW
+
 
 @app.route('/question1', methods = ['GET'])
 def question1():
