@@ -71,29 +71,3 @@ def transform_and_verify_inputs(start_time, end_time, data):
         "start":start,
         "end":end
     }, 0
-
-def get_range(start, end, data):
-
-    ''' Get index range for the given start and end time and dataset.
-    '''
-
-    json_time_format = "%Y-%m-%d %H:%M:%S"
-
-    start_ind = -1
-    end_ind = -1
-
-    for idx, row in enumerate(data):
-        if datetime.datetime.strptime(row['time'], json_time_format)>= start:
-            start_ind = idx
-            break
-    
-    for idx, row in enumerate(data[start_ind:]):
-        end_ind = idx + start_ind
-        row_datetime = datetime.datetime.strptime(row['time'], json_time_format)
-        if row_datetime >= end:
-            if row_datetime > end:
-                end_ind -= 1
-                break
-            break
-
-    return start_ind, end_ind

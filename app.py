@@ -7,7 +7,6 @@ from flask import jsonify
 from config import Current as Config
 from utils import get_inputs_from_query_string
 from utils import transform_and_verify_inputs
-from utils import get_range
 
 
 app = Flask(__name__)
@@ -31,7 +30,6 @@ def question1():
         return v
         
     start = v[0]['start']; end = v[0]['end']
-    start_ind, end_ind = get_range(start, end, data1)
 
 
     #       start_time      ---> UTC
@@ -62,28 +60,30 @@ def question1():
     prod_a_shift_a = 0; prod_a_shift_b = 0; prod_a_shift_c = 0
     prod_b_shift_a = 0; prod_b_shift_b = 0; prod_b_shift_c = 0
 
-    for row in data1[start_ind:end_ind + 1]:
-        row_time = datetime.datetime.strptime(row['time'], json_time_format).time()
+    for row in data1:
+        row_time = datetime.datetime.strptime(row['time'], json_time_format)
+        if row_time >= start and row_time <= end:
+            if row['production_A'] == True:
+                if row_time.time() <= shift_a_start:        
+                    prod_a_shift_c += 1
+                elif row_time.time() <= shift_b_start:
+                    prod_a_shift_a += 1
+                elif row_time.time() <= shift_c_start:
+                    prod_a_shift_b += 1
+                else:
+                    prod_a_shift_c += 1
 
-        if row['production_A'] == True:
-            if row_time <= shift_a_start:        
-                prod_a_shift_c += 1
-            elif row_time <= shift_b_start:
-                prod_a_shift_a += 1
-            elif row_time <= shift_c_start:
-                prod_a_shift_b += 1
-            else:
-                prod_a_shift_c += 1
-
-        if row['production_B'] == True:
-            if row_time <= shift_a_start:
-                prod_b_shift_c += 1
-            elif row_time <= shift_b_start:
-                prod_b_shift_a += 1
-            elif row_time <= shift_c_start:
-                prod_b_shift_b += 1
-            else:
-                prod_b_shift_c += 1
+            if row['production_B'] == True:
+                if row_time.time() <= shift_a_start:
+                    prod_b_shift_c += 1
+                elif row_time.time() <= shift_b_start:
+                    prod_b_shift_a += 1
+                elif row_time.time() <= shift_c_start:
+                    prod_b_shift_b += 1
+                else:
+                    prod_b_shift_c += 1
+        if row_time >= end:
+            break
 
     return {
         "shiftA":{
@@ -115,18 +115,23 @@ def question2():
         return v
         
     start = v[0]['start']; end = v[0]['end']
-    start_ind, end_ind = get_range(start, end, data2)
 
     total_runtime = 0; total_downtime = 0
 
-    for row in data2[start_ind:end_ind+1]:
-        runtime = row['runtime']
-        downtime = row['downtime']
-        if runtime > 1021:
-            downtime += (runtime - 1021)
-            runtime = 1021
-        total_runtime += runtime
-        total_downtime += downtime
+    json_time_format = "%Y-%m-%d %H:%M:%S"
+
+    for row in data2:
+        row_time = datetime.datetime.strptime(row['time'], json_time_format)
+        if row_time >= start and row_time <= end:
+            runtime = row['runtime']
+            downtime = row['downtime']
+            if runtime > 1021:
+                downtime += (runtime - 1021)
+                runtime = 1021
+            total_runtime += runtime
+            total_downtime += downtime
+        if row_time >= end:
+            break
 
     def to_format(seconds):
 
@@ -162,25 +167,30 @@ def question3():
         return v
         
     start = v[0]['start']; end = v[0]['end']
-    start_ind, end_ind = get_range(start, end, data3)
+
+    json_time_format = "%Y-%m-%d %H:%M:%S"
 
     belt_data = {}
-    for row in data3[start_ind:end_ind + 1]:
-        state = row['state']
-        belt_1 = int(row['belt1'])
-        belt_2 = int(row['belt2'])
-        _id = int(row['id'][2:])
+    for row in data3:
+        row_time = datetime.datetime.strptime(row['time'], json_time_format)
+        if row_time >= start and row_time <= end:
+            state = row['state']
+            belt_1 = int(row['belt1'])
+            belt_2 = int(row['belt2'])
+            _id = int(row['id'][2:])
 
-        if _id not in belt_data:
-            belt_data[_id] = {'count': 0, 'belt_1_total': 0, 'belt_2_total': 0}
+            if _id not in belt_data:
+                belt_data[_id] = {'count': 0, 'belt_1_total': 0, 'belt_2_total': 0}
 
-        if state == True:
-            belt_1 = 0
-        else:
-            belt_2 = 0
-        belt_data[_id]['count'] += 1
-        belt_data[_id]['belt_1_total'] += belt_1
-        belt_data[_id]['belt_2_total'] += belt_2
+            if state == True:
+                belt_1 = 0
+            else:
+                belt_2 = 0
+            belt_data[_id]['count'] += 1
+            belt_data[_id]['belt_1_total'] += belt_1
+            belt_data[_id]['belt_2_total'] += belt_2
+        if row_time >= end:
+            break
     
     belt_data_avg = [{
         "id":key,
