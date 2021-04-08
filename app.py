@@ -11,9 +11,15 @@ from utils import transform_and_verify_inputs
 
 app = Flask(__name__)
 
-data1 = json.loads((open('sample_json_1.json', 'r').read()))
-data2 = json.loads((open('sample_json_2.json', 'r').read()))
-data3 = json.loads((open('sample_json_3.json', 'r').read()))
+
+with open('sample_json_1.json', 'r') as js_file:
+    data1 = json.loads(js_file.read())
+
+with open('sample_json_2.json', 'r') as js_file:
+    data2 = json.loads(js_file.read())
+
+with open('sample_json_3.json', 'r') as js_file:
+    data3 = json.loads(js_file.read())
 
 
 @app.route('/question1', methods = ['GET'])
@@ -85,7 +91,7 @@ def question1():
         if row_time >= end:
             break
 
-    return {
+    return jsonify({
         "shiftA":{
             "production_A_count":prod_a_shift_a,
             "production_B_count":prod_b_shift_a
@@ -98,7 +104,7 @@ def question1():
             "production_A_count":prod_a_shift_c,
             "production_B_count":prod_b_shift_c
         }
-    }, 200
+    }), 200
 
 
 @app.route('/question2', methods = ['GET'])
@@ -148,11 +154,11 @@ def question2():
         return f"{h}h:{m}m:{s}s"
     
     utilisation = (total_runtime/(total_runtime+total_downtime)) * 100
-    return {
+    return jsonify({
         "runtime":to_format(total_runtime),
         "downtime":to_format(total_downtime),
         "utilisation":round(utilisation, 2)
-    }, 200
+    }), 200
 
 @app.route('/question3', methods = ['GET'])
 def question3():
@@ -191,7 +197,8 @@ def question3():
             belt_data[_id]['belt_2_total'] += belt_2
         if row_time >= end:
             break
-    
+        
+    #       Using list comprehension to transform the output into the required format
     belt_data_avg = [{
         "id":key,
         "avg_belt1":belt_data[key]['belt_1_total']//belt_data[key]['count'],
@@ -205,7 +212,7 @@ def question3():
 
 @app.route('/', methods = ['GET'])
 def index():
-    return {
+    return jsonify({
         "Name":"Ayman Imtyaz",
         "GitHub for this assignment":"https://github.com/aymanimtyaz/mstatz",
         "endpoints":{
@@ -214,7 +221,7 @@ def index():
             "question3":"/question3"
         },
         "Example query param":"?start_time=2021-01-28T07:30:00Z&end_time=2021-01-28T13:30:00Z"
-    }, 200
+    }), 200
 
 
 if __name__ == '__main__':
